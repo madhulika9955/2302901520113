@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import {
+  Box,
   Card,
   CardContent,
-  Typography,
-  Select,
-  MenuItem,
   FormControl,
   InputLabel,
-  Box,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { getNotifications } from "../api/notificationApi";
 import { Log } from "../middleware/logger";
 
-const TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVhdGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJzbWFkaHVsaWthOTQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ2NDkzNywiaWF0IjoxNzgwNDY0MDM3LCJpc3MiOiJBZmZvcmQgTWVkaWNhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiMWZjYWY0OTItMmZlMC00MTI3LWIzY2YtOThmMDMxNDRlOGE4IiwibG9jYWxlIjoiZW4tSU4iLCJuYW1lIjoibWFkaHVsaWthIHNpbmdoIiwic3ViIjoiODk2ZTk1MDEtNWYyYi00NDZkLWFkNmUtNmQxNjU4MmNhMjVmIn0sImVtYWlsIjoic21hZGh1bGlrYTk0NkBnbWFpbC5jb20iLCJuYW1lIjoibWFkaHVsaWthIHNpbmdoIiwicm9sbE5vIjoiMjMwMjkwMTUyMDExMyIsImFjY2Vzc0NvZGUiOiJzZFdXZ2MiLCJjbGllbnRJRCI6Ijg5NmU5NTAxLTVmMmItNDQ2ZC1hZDZlLTZkMTY1ODJjYTI1ZiIsImNsaWVudFNlY3JldCI6IkZBQVdDa0d3RHdRdUp6dUQifQ.Y_xNjPfEdigItVHo9DPV0zMd30q7a2gpK165cI2uunc";
+const TOKEN = "";
 
 const weights = {
   Placement: 3,
@@ -22,8 +22,8 @@ const weights = {
 };
 
 export default function PriorityNotifications() {
-  const [notifications, setNotifications] = useState([]);
   const [limit, setLimit] = useState(10);
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -31,15 +31,20 @@ export default function PriorityNotifications() {
 
   async function loadData() {
     try {
-      await Log("frontend", "info", "page", "Priority page loaded", TOKEN);
+      await Log(
+        "frontend",
+        "info",
+        "page",
+        "Priority Notifications loaded",
+        TOKEN,
+      );
       const data = await getNotifications(1, 1000, "");
-      const sorted = (data.notifications || []).sort((a, b) => {
-        const weightDiff = weights[b.Type] - weights[a.Type];
-        if (weightDiff !== 0) return weightDiff;
+      const sorted = [...(data.notifications || [])].sort((a, b) => {
+        const diff = weights[b.Type] - weights[a.Type];
+        if (diff !== 0) return diff;
         return new Date(b.Timestamp) - new Date(a.Timestamp);
       });
-
-      setNotifications(sorted.slice(0, limit));
+      setItems(sorted.slice(0, limit));
       await Log(
         "frontend",
         "info",
@@ -53,26 +58,29 @@ export default function PriorityNotifications() {
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <FormControl sx={{ minWidth: 200, mb: 2 }}>
-        <InputLabel>Top N</InputLabel>
-        <Select
-          value={limit}
-          label="Top N"
-          onChange={(e) => setLimit(Number(e.target.value))}
-        >
-          <MenuItem value={10}>10</MenuItem>
-          <MenuItem value={15}>15</MenuItem>
-          <MenuItem value={20}>20</MenuItem>
-        </Select>
-      </FormControl>
+    <Box>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2 }}>
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Top N</InputLabel>
+          <Select
+            value={limit}
+            label="Top N"
+            onChange={(e) => setLimit(Number(e.target.value))}
+          >
+            <MenuItem value={10}>10</MenuItem>
+            <MenuItem value={15}>15</MenuItem>
+            <MenuItem value={20}>20</MenuItem>
+          </Select>
+        </FormControl>
+      </Stack>
 
-      {notifications.map((item) => (
+      {items.map((item) => (
         <Card key={item.ID} sx={{ mb: 2 }}>
           <CardContent>
             <Typography variant="h6">{item.Message}</Typography>
-            <Typography variant="body2">Type: {item.Type}</Typography>
-            <Typography variant="body2">Time: {item.Timestamp}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {item.Type} • {item.Timestamp}
+            </Typography>
           </CardContent>
         </Card>
       ))}

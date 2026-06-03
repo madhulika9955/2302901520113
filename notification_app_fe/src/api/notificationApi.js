@@ -1,17 +1,32 @@
-const TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVhdGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJzbWFkaHVsaWthOTQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ2NDkzNywiaWF0IjoxNzgwNDY0MDM3LCJpc3MiOiJBZmZvcmQgTWVkaWNhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiMWZjYWY0OTItMmZlMC00MTI3LWIzY2YtOThmMDMxNDRlOGE4IiwibG9jYWxlIjoiZW4tSU4iLCJuYW1lIjoibWFkaHVsaWthIHNpbmdoIiwic3ViIjoiODk2ZTk1MDEtNWYyYi00NDZkLWFkNmUtNmQxNjU4MmNhMjVmIn0sImVtYWlsIjoic21hZGh1bGlrYTk0NkBnbWFpbC5jb20iLCJuYW1lIjoibWFkaHVsaWthIHNpbmdoIiwicm9sbE5vIjoiMjMwMjkwMTUyMDExMyIsImFjY2Vzc0NvZGUiOiJzZFdXZ2MiLCJjbGllbnRJRCI6Ijg5NmU5NTAxLTVmMmItNDQ2ZC1hZDZlLTZkMTY1ODJjYTI1ZiIsImNsaWVudFNlY3JldCI6IkZBQVdDa0d3RHdRdUp6dUQifQ.Y_xNjPfEdigItVHo9DPV0zMd30q7a2gpK165cI2uunc";
-const BASE_URL = "http://4.224.186.213/evaluation-service";
+const SAMPLE_NOTIFICATIONS = [
+  {
+    ID: "sample-1",
+    Type: "Placement",
+    Message: "New placement alert",
+    Timestamp: "2026-06-03T09:00:00Z",
+  },
+  {
+    ID: "sample-2",
+    Type: "Result",
+    Message: "Result update available",
+    Timestamp: "2026-06-03T08:30:00Z",
+  },
+  {
+    ID: "sample-3",
+    Type: "Event",
+    Message: "Upcoming event reminder",
+    Timestamp: "2026-06-03T07:45:00Z",
+  },
+];
 
-export const getNotifications = async (page = 1, limit = 10, type = "") => {
-  let url = `${BASE_URL}/notifications?page=${page}&limit=${limit}`;
-  if (type) url += `&notification_type=${type}`;
+export async function getNotifications(page = 1, limit = 10, type = "") {
+  const filtered =
+    type === ""
+      ? SAMPLE_NOTIFICATIONS
+      : SAMPLE_NOTIFICATIONS.filter((item) => item.Type === type);
 
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-      "Content-Type": "application/json",
-    },
-  });
-
-  return response.json();
-};
+  return {
+    notifications: filtered.slice((page - 1) * limit, page * limit),
+    totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
+  };
+}

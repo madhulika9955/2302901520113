@@ -1,6 +1,8 @@
 const BASE_URL = "http://4.224.186.213/evaluation-service/logs";
 
-export const Log = async (stack, level, packageName, message, token) => {
+export async function Log(stack, level, packageName, message, token) {
+  if (!token) return null;
+
   try {
     const response = await fetch(BASE_URL, {
       method: "POST",
@@ -15,9 +17,9 @@ export const Log = async (stack, level, packageName, message, token) => {
         message,
       }),
     });
-    return await response.json();
+
+    return response.ok ? response : null;
   } catch (error) {
-    console.error("Logging failed:", error);
-    throw error;
+    return null;
   }
-};
+}

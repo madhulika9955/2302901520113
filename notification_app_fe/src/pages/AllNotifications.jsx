@@ -1,82 +1,113 @@
-import { useState, useEffect } from "react";
-import { getNotifications } from "../api/notificationApi";
-import { Log } from "../middleware/logger";
+import { useEffect, useMemo, useState } from "react";
 import {
+  Box,
   Card,
   CardContent,
-  Typography,
-  Select,
-  MenuItem,
+  Chip,
   FormControl,
   InputLabel,
+  MenuItem,
+  Pagination,
+  Select,
+  Stack,
+  Typography,
 } from "@mui/material";
+import { getNotifications } from "../api/notificationApi";
+import { Log } from "../middleware/logger";
 
-const TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVhdGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJzbWFkaHVsaWthOTQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ2NDkzNywiaWF0IjoxNzgwNDY0MDM3LCJpc3MiOiJBZmZvcmQgTWVkaWNhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiMWZjYWY0OTItMmZlMC00MTI3LWIzY2YtOThmMDMxNDRlOGE4IiwibG9jYWxlIjoiZW4tSU4iLCJuYW1lIjoibWFkaHVsaWthIHNpbmdoIiwic3ViIjoiODk2ZTk1MDEtNWYyYi00NDZkLWFkNmUtNmQxNjU4MmNhMjVmIn0sImVtYWlsIjoic21hZGh1bGlrYTk0NkBnbWFpbC5jb20iLCJuYW1lIjoibWFkaHVsaWthIHNpbmdoIiwicm9sbE5vIjoiMjMwMjkwMTUyMDExMyIsImFjY2Vzc0NvZGUiOiJzZFdXZ2MiLCJjbGllbnRJRCI6Ijg5NmU5NTAxLTVmMmItNDQ2ZC1hZDZlLTZkMTY1ODJjYTI1ZiIsImNsaWVudFNlY3JldCI6IkZBQVdDa0d3RHdRdUp6dUQifQ.Y_xNjPfEdigItVHo9DPV0zMd30q7a2gpK165cI2uunc";
+const TOKEN = "";
 
 export default function AllNotifications() {
-  const [notifications, setNotifications] = useState([]);
+  const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
-  const [filterType, setFilterType] = useState("");
+  const [type, setType] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+
+  const viewed = useMemo(() => {
+    return JSON.parse(localStorage.getItem("viewed") || "[]");
+  }, []);
 
   useEffect(() => {
-    fetchNotifications();
-  }, [page, filterType]);
+    loadData();
+  }, [page, type]);
 
-  const fetchNotifications = async () => {
-    Log("frontend", "info", "page", "All Notifications page loaded", TOKEN);
-    Log("frontend", "info", "api", "Fetching notifications", TOKEN);
-
+  async function loadData() {
     try {
-      const data = await getNotifications(page, 10, filterType);
-      setNotifications(data.notifications);
-      Log(
+      await Log("frontend", "info", "page", "All Notifications loaded", TOKEN);
+      const data = await getNotifications(page, 10, type);
+      setItems(data.notifications || []);
+      setTotalPages(data.totalPages || 1);
+      await Log(
         "frontend",
         "info",
         "api",
-        "Notifications loaded successfully",
+        "Notifications fetched successfully",
         TOKEN,
       );
     } catch (error) {
-      Log("frontend", "error", "component", "Notification fetch failed", TOKEN);
+      await Log(
+        "frontend",
+        "error",
+        "api",
+        "All notifications fetch failed",
+        TOKEN,
+      );
     }
-  };
+  }
 
   return (
-    <div>
-      <FormControl sx={{ m: 2 }} size="small">
-        <InputLabel>Type</InputLabel>
-        <Select
-          value={filterType}
-          label="Type"
-          onChange={(e) => setFilterType(e.target.value)}
-        >
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="Placement">Placement</MenuItem>
-          <MenuItem value="Result">Result</MenuItem>
-          <MenuItem value="Event">Event</MenuItem>
-        </Select>
-      </FormControl>
+    <Box>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2 }}>
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Filter</InputLabel>
+          <Select
+            value={type}
+            label="Filter"
+            onChange={(e) => {
+              setPage(1);
+              setType(e.target.value);
+            }}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="Placement">Placement</MenuItem>
+            <MenuItem value="Result">Result</MenuItem>
+            <MenuItem value="Event">Event</MenuItem>
+          </Select>
+        </FormControl>
+      </Stack>
 
-      {notifications.map((notif) => {
-        const isViewed = JSON.parse(
-          localStorage.getItem("viewed") || "[]",
-        ).includes(notif.ID);
+      {items.map((item) => {
+        const isViewed = viewed.includes(item.ID);
 
         return (
-          <Card sx={{ m: 2 }}>
+          <Card key={item.ID} sx={{ mb: 2 }}>
             <CardContent>
-              {isViewed ? (
-                <Typography variant="h6">[VIEWED] {notif.Message}</Typography>
-              ) : (
-                <Typography variant="h6">[NEW] {notif.Message}</Typography>
-              )}
-              <Typography color="text.secondary">{notif.Type}</Typography>
-              <Typography color="text.secondary">{notif.Timestamp}</Typography>
+              <Stack direction="row" spacing={1} sx={{ mb: 1 }} flexWrap="wrap">
+                <Chip
+                  size="small"
+                  color={isViewed ? "default" : "success"}
+                  label={isViewed ? "VIEWED" : "NEW"}
+                />
+                <Chip size="small" label={item.Type} />
+              </Stack>
+
+              <Typography variant="h6">{item.Message}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {item.Timestamp}
+              </Typography>
             </CardContent>
           </Card>
         );
       })}
-    </div>
+
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(_, value) => setPage(value)}
+          color="primary"
+        />
+      </Box>
+    </Box>
   );
 }
