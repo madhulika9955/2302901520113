@@ -1,0 +1,14 @@
+import { Log } from "./logger.js";
+
+const TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVhdGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJzbWFkaHVsaWthOTQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ2NDkzNywiaWF0IjoxNzgwNDY0MDM3LCJpc3MiOiJBZmZvcmQgTWVkaWNhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiMWZjYWY0OTItMmZlMC00MTI3LWIzY2YtOThmMDMxNDRlOGE4IiwibG9jYWxlIjoiZW4tSU4iLCJuYW1lIjoibWFkaHVsaWthIHNpbmdoIiwic3ViIjoiODk2ZTk1MDEtNWYyYi00NDZkLWFkNmUtNmQxNjU4MmNhMjVmIn0sImVtYWlsIjoic21hZGh1bGlrYTk0NkBnbWFpbC5jb20iLCJuYW1lIjoibWFkaHVsaWthIHNpbmdoIiwicm9sbE5vIjoiMjMwMjkwMTUyMDExMyIsImFjY2Vzc0NvZGUiOiJzZFdXZ2MiLCJjbGllbnRJRCI6Ijg5NmU5NTAxLTVmMmItNDQ2ZC1hZDZlLTZkMTY1ODJjYTI1ZiIsImNsaWVudFNlY3JldCI6IkZBQVdDa0d3RHdRdUp6dUQifQ.Y_xNjPfEdigItVHo9DPV0zMd30q7a2gpK165cI2uunc";
+
+await Log(
+  "frontend",
+  "info",
+  "middleware",
+  "Logger initialized successfully",
+  TOKEN,
+);
+
+console.log("Logging test complete");

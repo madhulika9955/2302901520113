@@ -1,0 +1,20 @@
+[
+  {
+    "Id": "sample-1",
+    "Type": "Placement",
+    "Message": "New placement alert",
+    "Timestamp": "2026-06-03T09:00:00Z"
+  },
+  {
+    "Id": "sample-2",
+    "Type": "Result",
+    "Message": "Result update available",
+    "Timestamp": "2026-06-03T08:30:00Z"
+  },
+  {
+    "Id": "sample-3",
+    "Type": "Event",
+    "Message": "Upcoming event reminder",
+    "Timestamp": "2026-06-03T07:45:00Z"
+  }
+]
